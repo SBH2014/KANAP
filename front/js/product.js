@@ -22,8 +22,45 @@ if (search_params.has('id')) {
             }
         }
         )
+    26
 
 }
+var button = document.getElementById("addToCart")
+// on click, save, add, product selected by ID in local Storage //
+button.addEventListener("click", () => {
+    // display in local storage all the data  //
+    var optionsProduct =
+    {
+        productId: id,
+        quantity: document.getElementById("quantity").value,
+        color: document.getElementById("colors").value,
+        price: document.getElementById("price").innerHTML
+    }
 
+    console.log(optionsProduct)
+    // get product oprtions //
+
+
+
+    var productInLocalStorage = JSON.parse(localStorage.getItem("product"))
+
+
+    // if there's product in local Storage, pusht in json format //
+    if (productInLocalStorage) {
+        console.log(productInLocalStorage)
+        productInLocalStorage.push(optionsProduct)
+        localStorage.setItem("product", JSON.stringify(productInLocalStorage))
+
+    }
+
+    // if there's not product in local Storage, create an array and push it //
+    else {
+        productInLocalStorage = []
+        productInLocalStorage.push(optionsProduct)
+        console.log(productInLocalStorage)
+        localStorage.setItem("product", JSON.stringify(productInLocalStorage))
+    }
+
+})
 
 

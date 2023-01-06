@@ -1,5 +1,4 @@
 
-
 function displayProduct(product) {
     // a
     const aElement = document.createElement("a");
@@ -17,6 +16,7 @@ function displayProduct(product) {
     return aElement;
 
 }
+
 fetch("http://localhost:3000/api/products")
     .then((response) => response.json())
     .then((products) => {
