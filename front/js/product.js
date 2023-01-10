@@ -10,6 +10,7 @@ if (search_params.has('id')) {
             document.getElementsByClassName("item__img")[0].appendChild(imgElement(product))
             //price
             document.getElementById('price').innerHTML = product.price
+            document.getElementById('title').innerHTML = product.name
             //p description 
             document.getElementById('description').innerHTML = product.description
 
@@ -32,35 +33,59 @@ button.addEventListener("click", () => {
     var optionsProduct =
     {
         productId: id,
-        quantity: document.getElementById("quantity").value,
+        quantity: parseInt(document.getElementById("quantity").value),
         color: document.getElementById("colors").value,
-        price: document.getElementById("price").innerHTML
-    }
+        price: document.getElementById("price").innerHTML,
+        name: document.getElementById("title").innerHTML,
+        img : document.getElementsByClassName("item__img")[0].children[0].src
+        
+    } 
 
-    console.log(optionsProduct)
-    // get product oprtions //
+    // get product options //
 
 
 
-    var productInLocalStorage = JSON.parse(localStorage.getItem("product"))
+    var productsInLocalStorage = JSON.parse(localStorage.getItem("product"))
 
 
     // if there's product in local Storage, pusht in json format //
-    if (productInLocalStorage) {
-        console.log(productInLocalStorage)
-        productInLocalStorage.push(optionsProduct)
-        localStorage.setItem("product", JSON.stringify(productInLocalStorage))
+    if (productsInLocalStorage) {
+        const foundproduct = productsInLocalStorage.find((product) => {
+            console.log(product, optionsProduct)
+
+            return product.productId === optionsProduct.productId && product.color === optionsProduct.color
+        })
+        if (foundproduct) {
+            foundproduct.quantity += optionsProduct.quantity
+
+        }
+        else {
+            productsInLocalStorage.push(optionsProduct)
+
+        }
+
+        console.log(productsInLocalStorage)
+
+        localStorage.setItem("product", JSON.stringify(productsInLocalStorage))
 
     }
-
     // if there's not product in local Storage, create an array and push it //
     else {
-        productInLocalStorage = []
-        productInLocalStorage.push(optionsProduct)
-        console.log(productInLocalStorage)
-        localStorage.setItem("product", JSON.stringify(productInLocalStorage))
+        productsInLocalStorage = []
+        productsInLocalStorage.push(optionsProduct)
+        console.log(productsInLocalStorage)
+        localStorage.setItem("product", JSON.stringify(productsInLocalStorage))
     }
-
+ 
 })
+
+ 
+
+
+
+
+
+
+
 
 
