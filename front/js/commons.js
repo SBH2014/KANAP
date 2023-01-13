@@ -31,6 +31,11 @@ function pElement(product) {
 
 }
 
+function fillInTheFormFromLocalStorage (input) {
+    document.querySelector(`#${input}`).value = datalocalstorageFormObject.input
+
+}
+
 
 
 
