@@ -1,86 +1,68 @@
-var url = new URL(window.location.href);
-/*This const is to find a query string who contain '?'*/
-/*Which is followed by URL parameter In this case the "id" parameter*/
-var search_params = new URLSearchParams(url.search);
+//This const is to find a query string who contain '?'
+//Which is followed by URL parameter In this case the "id" parameter
+const url = new URL(window.location.href);
+const search_params = new URLSearchParams(url.search);
+
 if (search_params.has('id')) {
     var id = search_params.get('id');
     fetch("http://localhost:3000/api/products/" + id)
         .then(response => response.json())
-        .then(product => {
-            document.getElementsByClassName("item__img")[0].appendChild(imgElement(product))
-            //price
-            document.getElementById('price').innerHTML = product.price
-            document.getElementById('title').innerHTML = product.name
-            //p description 
-            document.getElementById('description').innerHTML = product.description
-
-            // la liste déroulante
-            const selectElement = document.getElementById('colors')
-
-            // on boucle sur les couleurs du produit
-            for (var color of product.colors) {
-                selectElement.appendChild(optionElement(color));
-            }
-        }
-        )
-    26
-
+        .then((product) => handleData(product))
 }
-var button = document.getElementById("addToCart")
+
 // on click, save, add, product selected by ID in local Storage //
+var button = elementById("addToCart")
 button.addEventListener("click", () => {
-    // display in local storage all the data  //
-    var optionsProduct =
-    {
-        productId: id,
-        quantity: parseInt(document.getElementById("quantity").value),
-        color: document.getElementById("colors").value,
-        price: document.getElementById("price").innerHTML,
-        name: document.getElementById("title").innerHTML,
-        img : document.getElementsByClassName("item__img")[0].children[0].src
-        
-    } 
-
     // get product options //
+    var optionsProduct = fillProductsOptions()
 
-
-
-    var productsInLocalStorage = JSON.parse(localStorage.getItem("product"))
-
+    var productsInLocalStorage = getBasketFromLocalStorage()
 
     // if there's product in local Storage, pusht in json format //
+    updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct);
+})
+
+
+// functions ------------------- Start -------------------------
+function updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct) {
     if (productsInLocalStorage) {
-        const foundproduct = productsInLocalStorage.find((product) => {
-            console.log(product, optionsProduct)
-
-            return product.productId === optionsProduct.productId && product.color === optionsProduct.color
-        })
-        if (foundproduct) {
-            foundproduct.quantity += optionsProduct.quantity
-
-        }
-        else {
-            productsInLocalStorage.push(optionsProduct)
-
-        }
-
-        console.log(productsInLocalStorage)
-
-        localStorage.setItem("product", JSON.stringify(productsInLocalStorage))
-
+        const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
+        foundproduct ? foundproduct.quantity += optionsProduct.quantity : productsInLocalStorage.push(optionsProduct)
     }
     // if there's not product in local Storage, create an array and push it //
     else {
-        productsInLocalStorage = []
-        productsInLocalStorage.push(optionsProduct)
-        console.log(productsInLocalStorage)
-        localStorage.setItem("product", JSON.stringify(productsInLocalStorage))
+        productsInLocalStorage = [];
+        productsInLocalStorage.push(optionsProduct);
     }
- 
-})
+    console.log('productsInLocalStorage', productsInLocalStorage)
+    saveUpdatedBasketIntoLocalStorage(productsInLocalStorage)
+}
 
- 
+function fillProductsOptions() {
+    return {
+        productId: id,
+        quantity: parseInt(elementById("quantity").value),
+        color: elementById("colors").value
+    };
+}
 
+function handleData(product) {
+    document.getElementsByClassName("item__img")[0].appendChild(imgElement(product))
+    //price
+    elementById('price').innerHTML = product.price
+    elementById('title').innerHTML = product.name
+    //p description 
+    elementById('description').innerHTML = product.description
+
+    // la liste déroulante
+    const selectElement = elementById('colors')
+    // on boucle sur les couleurs du produit
+    for (var color of product.colors) {
+        selectElement.appendChild(optionElement(color));
+    }
+    
+}
+// functions ------------------- End -------------------------
 
 
 

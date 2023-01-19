@@ -2,7 +2,6 @@
 function displayProduct(product) {
     // a
     const aElement = document.createElement("a");
-
     // article
     const articleElement = document.createElement("article");
 

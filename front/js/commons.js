@@ -1,5 +1,4 @@
 function imgElement(product) {
-    console.log(product)
     const imgElement = document.createElement("img");
     imgElement.src = product.imageUrl
     imgElement.alt = product.altTxt
@@ -31,10 +30,32 @@ function pElement(product) {
 
 }
 
-function fillInTheFormFromLocalStorage (input) {
-    document.querySelector(`#${input}`).value = datalocalstorageFormObject.input
-
+function saveUpdatedBasketIntoLocalStorage(product) {
+    localStorage.setItem("product", JSON.stringify(product))
 }
+
+function getBasketFromLocalStorage() {
+    return JSON.parse(localStorage.getItem("product"))
+}
+
+function getProductFromLocalStorageById(productsInLocalStorage, optionsProduct) {
+    return productsInLocalStorage.find((product) => {
+        return product.productId === optionsProduct.productId && product.color === optionsProduct.color;
+    });
+}
+
+function deleteProductFromLocalStorageById(productsInLocalStorage, optionsProduct) {
+    return productsInLocalStorage.find((product) => {
+        return product.productId === optionsProduct.productId && product.color === optionsProduct.color;
+    });
+}
+
+function elementById(id) {
+    return document.getElementById(id);
+}
+
+
+
 
 
 
