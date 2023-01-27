@@ -1,7 +1,7 @@
 //This const is to find a query string who contain '?'
 //Which is followed by URL parameter In this case the "id" parameter
-const url = new URL(window.location.href);
-const search_params = new URLSearchParams(url.search);
+let url = new URL(window.location.href);
+let search_params = new URLSearchParams(url.search);
 
 if (search_params.has('id')) {
     var id = search_params.get('id');
@@ -11,19 +11,22 @@ if (search_params.has('id')) {
 }
 
 // on click, save, add, product selected by ID in local Storage //
-var button = elementById("addToCart")
+let button = elementById("addToCart")
 button.addEventListener("click", () => {
-    // get product options //
     var optionsProduct = fillProductsOptions()
-
-    var productsInLocalStorage = getBasketFromLocalStorage()
-
-    // if there's product in local Storage, pusht in json format //
-    updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct);
+    if (checkSelectedQuantityAndColor()) {
+        document.querySelector("#addToCart").style.color = "rgb(255, 0, 0)";
+        alert("Pour valider votre choix veuillez renseigner une couleur, et une quantité valide entre 1 et 100")
+    }
+    else {
+        let productsInLocalStorage = getBasketFromLocalStorage()
+        updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct);
+        document.querySelector("#addToCart").style.color = "rgb(0, 200, 0)";
+        document.querySelector("#addToCart").textContent = "Produit ajouté !";
+    }
 })
 
-
-// functions ------------------- Start -------------------------
+// functions ------------------- Start -------------------------//
 function updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct) {
     if (productsInLocalStorage) {
         const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
@@ -34,7 +37,6 @@ function updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct) {
         productsInLocalStorage = [];
         productsInLocalStorage.push(optionsProduct);
     }
-    console.log('productsInLocalStorage', productsInLocalStorage)
     saveUpdatedBasketIntoLocalStorage(productsInLocalStorage)
 }
 
@@ -46,23 +48,28 @@ function fillProductsOptions() {
     };
 }
 
+function checkSelectedQuantityAndColor() {
+    let optionsProduct = fillProductsOptions()
+    return isNaN(optionsProduct.quantity) ||
+        optionsProduct.quantity === undefined ||
+        optionsProduct.quantity < 1 ||
+        optionsProduct.quantity > 100 ||
+        optionsProduct.color === "" ||
+        optionsProduct.color === undefined;
+}
+
 function handleData(product) {
     document.getElementsByClassName("item__img")[0].appendChild(imgElement(product))
-    //price
     elementById('price').innerHTML = product.price
     elementById('title').innerHTML = product.name
-    //p description 
     elementById('description').innerHTML = product.description
-
-    // la liste déroulante
     const selectElement = elementById('colors')
-    // on boucle sur les couleurs du produit
     for (var color of product.colors) {
         selectElement.appendChild(optionElement(color));
     }
-    
 }
-// functions ------------------- End -------------------------
+
+// functions ------------------- End -------------------------//
 
 
 

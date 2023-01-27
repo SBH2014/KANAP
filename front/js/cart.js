@@ -1,43 +1,46 @@
 
-// display products in cart page 
+// ---------------------------------display products in cart page--------------------------------------------//
+
+//get products from localstorage 
 let products = getBasketFromLocalStorage()
+// total quantity and price 
+let totalQuantity = 0;
+let totalPrice = 0;
+
 let cart__items = elementById("cart__items")
-
-const fetchProductData = async (productId) => {
-  const result= fetch("http://localhost:3000/api/products/" + productId)
-    return (await result).json()
+//  call of the api product resource
+const fetchProductData = (item) => {
+  fetch("http://localhost:3000/api/products/" + item.productId)
+    .then((response) => response.json())
+    .then((data) => {
+      calculateTotalPrice(data, item);
+      calculateTotalQuantity(item);
+      cart__items.innerHTML += makeNewArticle(item, data)
+    })
+    .catch((e) => console.error(e))
+    .finally(() => {
+      //  remove product from cart page 
+      let deletButton = document.querySelectorAll('.deleteItem');
+      deletButton.forEach(item => {
+        item.addEventListener('click', event => {
+          removeProductFromBasket(item);
+        })
+      })
+      // change quantity in cart page
+      document.querySelectorAll('.itemQuantity').forEach(item => {
+        item.addEventListener('input', (event) => {
+          changeQuantiityInBasket(item)
+        })
+      })
+    })
 }
-
-// remove product from basket and update products in localstorage
-displayProducts()
-  .then(() => {
-    //  remove product from cart page 
-    let deletButton = document.querySelectorAll('.deleteItem');
-    deletButton.forEach(item => {
-      item.addEventListener('click', event => {
-        removeProductFromBasket(item);
-      })
-    })
-    // change quantity in cart page 
-    let quantityClass = document.getElementsByClassName('itemQuantity')[0];
-    document.querySelectorAll('.itemQuantity').forEach(item => {
-      item.addEventListener('input', (event) => {
-        changeQuantiityInBasket(item)
-
-      })
-    })
-  });
-
-
-
 // display product in cart page 
-async function displayProducts() {
+// Function define the conditions for displaying the products in the basket
+function displayProducts() {
   if (products && products.length != 0) {
     for (let item of products) {
-      let product = await forceUpdateQuantityAndPrice(item);
-      cart__items.innerHTML += makeNewArticle(item, product)
+      fetchProductData(item);
     }
-
   }
   else {
     document.querySelector("#totalQuantity").innerHTML = "0";
@@ -45,16 +48,10 @@ async function displayProducts() {
     document.querySelector("h1").innerHTML =
       "Vous n'avez pas encore d'article dans votre panier !";
   }
-
 }
 
-async function forceUpdateQuantityAndPrice(item) {
-  let product;
-  product = await fetchProductData(item.productId);
-  calculateTotalPrice(product, item);
-  calculateTotalQuantity(item);
-  return product;
-}
+//
+displayProducts();
 
 // create html elements in the DOM 
 function makeNewArticle(item, product) {
@@ -81,9 +78,6 @@ function makeNewArticle(item, product) {
 </article>`
 }
 
-// total quantity and price 
-let totalQuantity = 0;
-let totalPrice = 0;
 function calculateTotalQuantity(item) {
   totalQuantity += parseInt(item.quantity);
   elementById("totalQuantity").innerHTML = totalQuantity
@@ -106,9 +100,8 @@ function removeProductFromBasket(item) {
   }
 }
 
-
 //listen to the change in quantity
-async function changeQuantiityInBasket(item) {
+function changeQuantiityInBasket(item) {
   let dataId = getDataIdOfArticle(item);
   let dataColor = getDataColorOfArticle(item);
   for (let product of products) {
@@ -125,15 +118,23 @@ async function changeQuantiityInBasket(item) {
 
     }
   }
+
   saveUpdatedBasketIntoLocalStorage(products)
   totalQuantity = 0;
   totalPrice = 0;
   for (let item of products) {
-    let product = await forceUpdateQuantityAndPrice(item);
+    forceUpdateQuantityAndTotalPrice(item);
   }
-
-
 }
+function forceUpdateQuantityAndTotalPrice(item) {
+  fetch("http://localhost:3000/api/products/" + item.productId)
+    .then((response) => response.json())
+    .then((data) => {
+      calculateTotalPrice(data, item);
+      calculateTotalQuantity(item);
+    });
+}
+
 function getDataColorOfArticle(item) {
   return item.closest('article').getAttribute("data-color");
 }
@@ -142,120 +143,158 @@ function getDataIdOfArticle(item) {
   return item.closest('article').getAttribute("data-id");
 }
 
+// --------------------------------- end display products in cart page--------------------------------------------//
 
-//-----------------------------------------Form---------------------------------------------------//
-// add form to localstorage 
-var buttonOrder = elementById("order")
-buttonOrder.addEventListener("click", (event) => {
-  event.preventDefault();
-  // get form values
-  const formValues = getFormeValues()
-  // add formValues to localstorage
-  const productsAndFormtoSend = {
-    products,
-    formValues
-  }
-  // verification and validation of the form
-  // verification of the firstName
-  const prenom = formValues.firstName
-  const nom = formValues.lastName
-  const ville = formValues.city
-  const adresse = formValues.address
-  // regEx of the firstName,lastName and City
-  let regExPrenomNomVille = (value) => {
-    return new RegExp("/^[A-Za-z]{3,20}$/").test(value)
-  }
-  // regEx of the address
-  let regExaddress = (value) => {
-    return /^[a-zA-Z0-9À-ÿ\s,.'-]{3,}$/.test(value)
-  }
-  // regEx of the email
-  let regExEmail = (value) => {
-    return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value))
-  }
-  // validation of the form
-  if (fisrNameControl() && lastNameControl() && cityControl() && addressControl() && emailControl()) {
-    localStorage.setItem("formValues", JSON.stringify(formValues))
-  }
-  else {
-    alert("Veuillez bien remplir le formulaire")
-  };
-  //function  FormeValues
-  function fisrNameControl() {
-    let prenom = formValues.firstName
 
-    if (regExPrenomNomVille(prenom)) {
-      return true
-    }
-    else {
-      elementById("firstNameErrorMsg").innerHTML = 'Merci de saisir un prénom valide'
-      return false
-    }
-
-  };
-  function lastNameControl() {
-    const nom = formValues.lastName
-    if (regExPrenomNomVille(nom)) {
-      return true
-    }
-    else {
-      elementById("lastNameErrorMsg").innerHTML = 'Merci de saisir un nom valide'
-      return false
-    }
-
-  };
-  function cityControl() {
-    const city = formValues.city
-    if (regExPrenomNomVille(ville)) {
-      return true
-    }
-    else {
-      elementById("cityErrorMsg").innerHTML = 'Merci de saisir une ville valide'
-      return false
-    }
-
-  };
-  function addressControl() {
-    const theAddress = formValues.address
-    if (regExaddress(theAddress)) {
-      return true
-    }
-    else {
-      alert("adresse : n'est pas valide ");
-      elementById("addressErrorMsg").innerHTML = 'Merci de saisir une adresse valide'
-      return false
-    }
-
-  };
-  function emailControl() {
-    const email = formValues.email
-    if (regExEmail(email)) {
-      return true
-    }
-    else {
-      alert("Email : n'est pas valide ");
-      elementById("emailErrorMsg").innerHTML = 'Merci de saisir une adresse mail valide'
-      return false
-    }
-
-  };
-
+//------------------------------------ validation of the basket page and get confirmation page ----------------------------------------------------//
+let buttonOrder = elementById("order")
+buttonOrder.addEventListener("click", function (e) {
+  // prevent the page from reloading
+  e.preventDefault();
+  validationOfFORM();
+  sendProductIdAndContact();
+  clearLocalStorage();
 })
 
-// get datalocalstorage 
-const datalocalstorageForm = localStorage.getItem("formValues")
-// convert to object js
-const datalocalstorageFormObject = JSON.parse(datalocalstorageForm)
-function getFormeValues() {
-  return {
-    firstName: document.querySelector("#firstName").value,
-    lastName: document.querySelector("#lastName").value,
-    address: document.querySelector("#address").value,
-    city: document.querySelector("#city").value,
-    email: document.querySelector("#email").value,
-  };
-}
 
+//---------------------------------------case-by-case treatment-------------------------------------//
+// get the form 
+let formElement = document.querySelector('form');
+// listen to firstname change 
+formElement.firstName.addEventListener("input", function () {
+  valideFirstName(this.value)
+});
+// listen to lastname change
+formElement.lastName.addEventListener("input", function () {
+  valideLastName(this.value)
+});
+//listen to the modification of the city
+formElement.city.addEventListener("input", function () {
+
+  valideCity(this.value)
+
+});
+// listen to the modification of the address 
+formElement.address.addEventListener("input", function () {
+  valideAddress(this.value)
+});
+// listen to the modification of the email
+formElement.email.addEventListener("input", function () {
+  valideEmail(this.value)
+})
+//-----------------case-by-case validation functions --------------------------//
+function validationOfFORM() {
+  if (valideFirstName(firstName.value) && valideLastName(lastName.value) && valideCity(city.value) && valideAddress(address.value) && valideEmail(email.value)) {
+    {
+      let formValues = getFormeValues()
+      localStorage.setItem("formValues", JSON.stringify(formValues))
+    }
+  }
+  else {
+    alert('veuillez bien remplir les champs !')
+  }
+}
+//function of email validation 
+const valideEmail = function (inputEmail) {
+  if (regExEmail(inputEmail)) {
+    elementById("emailErrorMsg").innerHTML = ''
+    return true
+  }
+  else {
+    elementById("emailErrorMsg").innerHTML = 'Merci de saisir un email valide'
+    return false
+  }
+};
+//function of address validation 
+const valideAddress = function (inputAddress) {
+  if (regExaddress(inputAddress)) {
+    elementById("addressErrorMsg").innerHTML = ''
+    return true
+  }
+  else {
+    elementById("addressErrorMsg").innerHTML = 'Merci de saisir une adresse valide'
+    return false
+  }
+};
+//function of city validation 
+const valideCity = function (inputCity) {
+  if (regExPrenomNomVille(inputCity)) {
+    elementById("cityErrorMsg").innerHTML = ''
+    return true
+  }
+  else {
+    elementById("cityErrorMsg").innerHTML = 'Merci de saisir une ville valide'
+    return false
+  }
+};
+//function of firstName validation 
+const valideFirstName = function (inputFirstName) {
+  if (regExPrenomNomVille(inputFirstName)) {
+    elementById("firstNameErrorMsg").innerHTML = ''
+    return true
+  }
+  else {
+    elementById("firstNameErrorMsg").innerHTML = 'Merci de saisir un prénom valide'
+    return false
+  }
+};
+//function of lastName validation 
+const valideLastName = function (inputLastName) {
+  if (regExPrenomNomVille(inputLastName)) {
+    elementById("lastNameErrorMsg").innerHTML = ''
+    return true
+  }
+  else {
+    elementById("lastNameErrorMsg").innerHTML = 'Merci de saisir un nom valide'
+    return false
+  }
+}
+//------------------------------ RegEx Function--------------------------------//
+// regEx of the email
+let regExEmail = (value) => {
+  return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value))
+}
+// regEx of the Firstname lastname and city
+let regExPrenomNomVille = (value) => {
+  return /^[A-Za-z]{3,20}$/.test(value)
+}
+// regEx of the address 
+let regExaddress = (value) => {
+  return /^[a-zA-Z0-9À-ÿ\s,.'-]{3,}$/.test(value)
+}
+//------------------------------------End RegEx function-----------------------------//
+
+//function on posting validation to server
+
+function sendProductIdAndContact() {
+  let formValues = getFormeValues()
+  // put the values ​​of the forms and the selected products in an object sent to the servers
+  const productsAndFormtoSend = {
+    products: products.map(aProduct => aProduct.productId),
+    contact: formValues
+  }
+  //send object "productsAndFormtoSend" to the server 
+
+
+  const rawResponse = fetch('http://localhost:3000/api/products/order', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(productsAndFormtoSend)
+  }).then((response) => response.json())
+    .then((data) => window.location.replace(`/front/html/confirmation.html?commande=${data.orderId}`))
+}
+  
+
+
+
+//the customer's data will be stored in this table for the order on the basket page
+// get datalocalstorage 
+let datalocalstorageForm = localStorage.getItem("formValues")
+// convert to object js
+let datalocalstorageFormObject = JSON.parse(datalocalstorageForm)
 // function to fill form from localstorage
 function fillInTheFormFromLocalStorage(input) {
   document.querySelector(`#${input}`).value = datalocalstorageFormObject[input];
@@ -265,6 +304,13 @@ fillInTheFormFromLocalStorage("lastName")
 fillInTheFormFromLocalStorage("address")
 fillInTheFormFromLocalStorage("city")
 fillInTheFormFromLocalStorage("email");
-
-//-----------------------------------------endForm---------------------------------------------------//
-
+//function to get form values
+function getFormeValues() {
+  return {
+    firstName: document.querySelector("#firstName").value,
+    lastName: document.querySelector("#lastName").value,
+    address: document.querySelector("#address").value,
+    city: document.querySelector("#city").value,
+    email: document.querySelector("#email").value,
+  };
+}
