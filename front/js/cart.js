@@ -13,9 +13,9 @@ const fetchProductData = (item) => {
   fetch("http://localhost:3000/api/products/" + item.productId)
     .then((response) => response.json())
     .then((data) => {
+      cart__items.innerHTML += makeNewArticle(item, data)
       calculateTotalPrice(data, item);
       calculateTotalQuantity(item);
-      cart__items.innerHTML += makeNewArticle(item, data)
     })
     .catch((e) => console.error(e))
     .finally(() => {
@@ -288,22 +288,6 @@ function sendProductIdAndContact() {
 }
   
 
-
-
-//the customer's data will be stored in this table for the order on the basket page
-// get datalocalstorage 
-let datalocalstorageForm = localStorage.getItem("formValues")
-// convert to object js
-let datalocalstorageFormObject = JSON.parse(datalocalstorageForm)
-// function to fill form from localstorage
-function fillInTheFormFromLocalStorage(input) {
-  document.querySelector(`#${input}`).value = datalocalstorageFormObject[input];
-}
-fillInTheFormFromLocalStorage("firstName")
-fillInTheFormFromLocalStorage("lastName")
-fillInTheFormFromLocalStorage("address")
-fillInTheFormFromLocalStorage("city")
-fillInTheFormFromLocalStorage("email");
 //function to get form values
 function getFormeValues() {
   return {
