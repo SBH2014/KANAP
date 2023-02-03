@@ -7,27 +7,28 @@ if (search_params.has('id')) {
     var id = search_params.get('id');
     fetch("http://localhost:3000/api/products/" + id)
         .then(response => response.json())
-        .then((product) => handleData(product))
+        .then((product) => createProductToHtml(product))
 }
 
 // on click, save, add, product selected by ID in local Storage //
 let button = elementById("addToCart")
 button.addEventListener("click", () => {
     var optionsProduct = fillProductsOptions()
-    if (checkSelectedQuantityAndColor()) {
-        document.querySelector("#addToCart").style.color = "rgb(255, 0, 0)";
-        alert("Pour valider votre choix veuillez renseigner une couleur, et une quantité valide entre 1 et 100")
-    }
-    else {
-        let productsInLocalStorage = getBasketFromLocalStorage()
-        updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct);
+    if (isSelectedQuantityAndColorValid()) {
+        addProductToBasket(optionsProduct);
         document.querySelector("#addToCart").style.color = "rgb(0, 200, 0)";
         document.querySelector("#addToCart").textContent = "Produit ajouté !";
+    }
+    else {
+
+        document.querySelector("#addToCart").style.color = "rgb(255, 0, 0)";
+        alert("Pour valider votre choix veuillez renseigner une couleur, et une quantité valide entre 1 et 100")
     }
 })
 
 // functions ------------------- Start -------------------------//
-function updateQuantityInLocalStorage(productsInLocalStorage, optionsProduct) {
+function addProductToBasket(optionsProduct) {
+    let productsInLocalStorage = getBasketFromLocalStorage()
     if (productsInLocalStorage) {
         const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
         foundproduct ? foundproduct.quantity += optionsProduct.quantity : productsInLocalStorage.push(optionsProduct)
@@ -48,21 +49,27 @@ function fillProductsOptions() {
     };
 }
 
-function checkSelectedQuantityAndColor() {
+function isSelectedQuantityAndColorValid() {
     let optionsProduct = fillProductsOptions()
-    return isNaN(optionsProduct.quantity) ||
-        optionsProduct.quantity === undefined ||
-        optionsProduct.quantity < 1 ||
-        optionsProduct.quantity > 100 ||
-        optionsProduct.color === "" ||
-        optionsProduct.color === undefined;
+    return optionsProduct.quantity && optionsProduct.quantity >= 1 && optionsProduct.quantity <= 100 && optionsProduct.color
+
 }
 
-function handleData(product) {
+function createProductToHtml(product) {
     document.getElementsByClassName("item__img")[0].appendChild(imgElement(product))
-    elementById('price').innerHTML = product.price
-    elementById('title').innerHTML = product.name
-    elementById('description').innerHTML = product.description
+    let pElement = document.querySelector('.item__content__titlePrice p')
+    console.log(pElement)
+    let priceSpan = elementById('price')
+    priceSpan.textContent = product.price
+
+
+    let htmlTitle = product.name
+    let titleElement = elementById('title')
+    titleElement.insertAdjacentHTML("afterbegin", htmlTitle);
+
+    let htmlDescription = product.description
+    let descriptionElement =  elementById('description')
+    descriptionElement.insertAdjacentHTML("beforeend", htmlDescription);
     const selectElement = elementById('colors')
     for (var color of product.colors) {
         selectElement.appendChild(optionElement(color));

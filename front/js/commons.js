@@ -9,7 +9,7 @@ function optionElement(color) {
     // option
     const optionElement = document.createElement("option");
     optionElement.value = color
-    optionElement.innerHTML = color
+    optionElement.textContent= color
     return optionElement
 }
 
@@ -17,7 +17,7 @@ function h3Element(product) {
     // h3
     const h3Element = document.createElement("h3");
     h3Element.className = "productName"
-    h3Element.innerHTML = product.name
+    h3Element.textContent = product.name
     return h3Element;
 }
 
@@ -25,7 +25,7 @@ function pElement(product) {
     // p
     const pElement = document.createElement("p");
     pElement.className = "productDescription"
-    pElement.innerHTML = product.description
+    pElement.textContent = product.description
     return pElement;
 
 }
@@ -63,10 +63,7 @@ function deleteProductFromLocalStorageById(productsInLocalStorage, optionsProduc
 function elementById(id) {
     return document.getElementById(id);
 }
-// delete the localstorage after validation of the command
-function clearLocalStorage() {
-    localStorage.clear()
-}
+
 
 
 

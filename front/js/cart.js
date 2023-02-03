@@ -13,7 +13,10 @@ const fetchProductData = (item) => {
   fetch("http://localhost:3000/api/products/" + item.productId)
     .then((response) => response.json())
     .then((data) => {
-      cart__items.innerHTML += makeNewArticle(item, data)
+      let htmlArticle = makeNewArticle(item, data)
+      cart__items.innerHTML += htmlArticle;
+
+
       calculateTotalPrice(data, item);
       calculateTotalQuantity(item);
     })
@@ -28,8 +31,8 @@ const fetchProductData = (item) => {
       })
       // change quantity in cart page
       document.querySelectorAll('.itemQuantity').forEach(item => {
-        item.addEventListener('input', (event) => {
-          changeQuantiityInBasket(item)
+        item.addEventListener('input', event => {
+          changeQuantityInBasket(item)
         })
       })
     })
@@ -43,16 +46,20 @@ function displayProducts() {
     }
   }
   else {
-    document.querySelector("#totalQuantity").innerHTML = "0";
-    document.querySelector("#totalPrice").innerHTML = "0";
-    document.querySelector("h1").innerHTML =
-      "Vous n'avez pas encore d'article dans votre panier !";
+    document.querySelector("#totalQuantity").insertAdjacentHTML("afterbegin", "0");
+    document.querySelector("#totalPrice").insertAdjacentHTML("afterbegin", "0");
+    let h1 = document.querySelector("h1") 
+    let newH1 = document.createElement('h1')
+    let divElement =document.getElementById('cartAndFormContainer')
+    newH1.textContent = "Vous n'avez pas encore d'article dans votre panier !"
+    divElement.replaceChild(newH1, h1)
   }
 }
 
 //
 displayProducts();
-
+// attention innerHtml -----------------------------§§§§§§§...../// 
+// faire la meme chose ans le script 
 // create html elements in the DOM 
 function makeNewArticle(item, product) {
   return `<article class="cart__item" data-id="${item.productId}" data-color="${item.color}">
@@ -77,16 +84,19 @@ function makeNewArticle(item, product) {
   </div>
 </article>`
 }
+let pElementTotal = document.querySelector('.cart__price p')
 
 function calculateTotalQuantity(item) {
   totalQuantity += parseInt(item.quantity);
-  elementById("totalQuantity").innerHTML = totalQuantity
+  elementById("totalQuantity").textContent = totalQuantity 
+
 }
 
 function calculateTotalPrice(data, item) {
   // obliger de le faire ici parce que le calcul se fait dans une fonction asynchrone.
   totalPrice += (parseInt(data.price) * parseInt(item.quantity))
-  elementById("totalPrice").innerHTML = totalPrice
+  elementById("totalPrice").textContent= totalPrice
+
 }
 
 // function to delet products from basket 
@@ -101,7 +111,7 @@ function removeProductFromBasket(item) {
 }
 
 //listen to the change in quantity
-function changeQuantiityInBasket(item) {
+function changeQuantityInBasket(item) {
   let dataId = getDataIdOfArticle(item);
   let dataColor = getDataColorOfArticle(item);
   for (let product of products) {
@@ -123,6 +133,7 @@ function changeQuantiityInBasket(item) {
   totalQuantity = 0;
   totalPrice = 0;
   for (let item of products) {
+
     forceUpdateQuantityAndTotalPrice(item);
   }
 }
@@ -151,9 +162,14 @@ let buttonOrder = elementById("order")
 buttonOrder.addEventListener("click", function (e) {
   // prevent the page from reloading
   e.preventDefault();
-  validationOfFORM();
-  sendProductIdAndContact();
-  clearLocalStorage();
+  if (isFormvalid()) {
+    sendProductIdAndContact();
+    clearLocalStorage();
+  }
+  else {
+    alert('veuillez remplir le formulaire')
+  }
+
 })
 
 
@@ -162,90 +178,84 @@ buttonOrder.addEventListener("click", function (e) {
 let formElement = document.querySelector('form');
 // listen to firstname change 
 formElement.firstName.addEventListener("input", function () {
-  valideFirstName(this.value)
+  isFirstNameValide(this.value)
 });
 // listen to lastname change
 formElement.lastName.addEventListener("input", function () {
-  valideLastName(this.value)
+  isLastNameValide(this.value)
 });
 //listen to the modification of the city
 formElement.city.addEventListener("input", function () {
 
-  valideCity(this.value)
+  isCityValide(this.value)
 
 });
 // listen to the modification of the address 
 formElement.address.addEventListener("input", function () {
-  valideAddress(this.value)
+  isAddressValide(this.value)
 });
 // listen to the modification of the email
 formElement.email.addEventListener("input", function () {
-  valideEmail(this.value)
+  isEmailValide(this.value)
 })
 //-----------------case-by-case validation functions --------------------------//
-function validationOfFORM() {
-  if (valideFirstName(firstName.value) && valideLastName(lastName.value) && valideCity(city.value) && valideAddress(address.value) && valideEmail(email.value)) {
-    {
-      let formValues = getFormeValues()
-      localStorage.setItem("formValues", JSON.stringify(formValues))
-    }
-  }
-  else {
-    alert('veuillez bien remplir les champs !')
-  }
+function isFormvalid() {
+  return isFirstNameValide(firstName.value) && isLastNameValide(lastName.value) && isCityValide(city.value) && isAddressValide(address.value) && isEmailValide(email.value)
 }
 //function of email validation 
-const valideEmail = function (inputEmail) {
+const isEmailValide = function (inputEmail) {
   if (regExEmail(inputEmail)) {
-    elementById("emailErrorMsg").innerHTML = ''
+    elementById("emailErrorMsg").textContent= ''
+    let errorElement = document.querySelector('#emailErrorMsg')
     return true
   }
   else {
-    elementById("emailErrorMsg").innerHTML = 'Merci de saisir un email valide'
+    elementById("emailErrorMsg").textContent= 'Merci de saisir un email valide'
     return false
   }
 };
 //function of address validation 
-const valideAddress = function (inputAddress) {
+const isAddressValide = function (inputAddress) {
   if (regExaddress(inputAddress)) {
-    elementById("addressErrorMsg").innerHTML = ''
+    elementById("addressErrorMsg").textContent = ''
     return true
   }
   else {
-    elementById("addressErrorMsg").innerHTML = 'Merci de saisir une adresse valide'
+    elementById("addressErrorMsg").textContent = 'Merci de saisir une adresse valide'
     return false
   }
 };
 //function of city validation 
-const valideCity = function (inputCity) {
+const isCityValide = function (inputCity) {
   if (regExPrenomNomVille(inputCity)) {
-    elementById("cityErrorMsg").innerHTML = ''
+    elementById("cityErrorMsg").textContent = ''
     return true
   }
   else {
-    elementById("cityErrorMsg").innerHTML = 'Merci de saisir une ville valide'
+    elementById("cityErrorMsg").textContent = 'Merci de saisir une ville valide'
     return false
   }
 };
 //function of firstName validation 
-const valideFirstName = function (inputFirstName) {
+const isFirstNameValide = function (inputFirstName) {
   if (regExPrenomNomVille(inputFirstName)) {
-    elementById("firstNameErrorMsg").innerHTML = ''
+    elementById("firstNameErrorMsg").textContent = ''
+  
     return true
   }
   else {
-    elementById("firstNameErrorMsg").innerHTML = 'Merci de saisir un prénom valide'
+    elementById("firstNameErrorMsg").textContent = 'Merci de saisir un prénom valide'
     return false
   }
 };
 //function of lastName validation 
-const valideLastName = function (inputLastName) {
+const isLastNameValide = function (inputLastName) {
   if (regExPrenomNomVille(inputLastName)) {
-    elementById("lastNameErrorMsg").innerHTML = ''
+    elementById("lastNameErrorMsg").textContent = ''
     return true
   }
   else {
-    elementById("lastNameErrorMsg").innerHTML = 'Merci de saisir un nom valide'
+    elementById("lastNameErrorMsg").textContent= 'Merci de saisir un nom valide'
     return false
   }
 }
@@ -286,7 +296,7 @@ function sendProductIdAndContact() {
   }).then((response) => response.json())
     .then((data) => window.location.replace(`/front/html/confirmation.html?commande=${data.orderId}`))
 }
-  
+
 
 //function to get form values
 function getFormeValues() {
@@ -297,4 +307,8 @@ function getFormeValues() {
     city: document.querySelector("#city").value,
     email: document.querySelector("#email").value,
   };
+}
+// delete the localstorage after validation of the command
+function clearLocalStorage() {
+    localStorage.clear()
 }

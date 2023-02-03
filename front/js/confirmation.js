@@ -7,5 +7,5 @@ console.log(search_params.get('commande'))
 
 if (search_params.has('commande')) {
     var commande = search_params.get('commande');
-    elementById('orderId').innerHTML = commande
+    elementById('orderId').textContent = commande
 }
