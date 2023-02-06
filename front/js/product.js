@@ -1,3 +1,4 @@
+
 //This const is to find a query string who contain '?'
 //Which is followed by URL parameter In this case the "id" parameter
 let url = new URL(window.location.href);
@@ -40,7 +41,6 @@ function addProductToBasket(optionsProduct) {
     }
     saveUpdatedBasketIntoLocalStorage(productsInLocalStorage)
 }
-
 function fillProductsOptions() {
     return {
         productId: id,
@@ -68,12 +68,25 @@ function createProductToHtml(product) {
     titleElement.insertAdjacentHTML("afterbegin", htmlTitle);
 
     let htmlDescription = product.description
-    let descriptionElement =  elementById('description')
+    let descriptionElement = elementById('description')
     descriptionElement.insertAdjacentHTML("beforeend", htmlDescription);
     const selectElement = elementById('colors')
     for (var color of product.colors) {
         selectElement.appendChild(optionElement(color));
     }
+}
+function imgElement(product) {
+    const imgElement = document.createElement("img");
+    imgElement.src = product.imageUrl
+    imgElement.alt = product.altTxt
+    return imgElement
+}
+function optionElement(color) {
+    // option
+    const optionElement = document.createElement("option");
+    optionElement.value = color
+    optionElement.textContent= color
+    return optionElement
 }
 
 // functions ------------------- End -------------------------//

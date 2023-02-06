@@ -14,9 +14,10 @@ const fetchProductData = (item) => {
     .then((response) => response.json())
     .then((data) => {
       let htmlArticle = makeNewArticle(item, data)
-      cart__items.innerHTML += htmlArticle;
-
-
+      let newArticle = document.createElement("article")
+      newArticle.innerHTML += htmlArticle;
+      cart__items.appendChild(newArticle)
+      
       calculateTotalPrice(data, item);
       calculateTotalQuantity(item);
     })
@@ -48,9 +49,9 @@ function displayProducts() {
   else {
     document.querySelector("#totalQuantity").insertAdjacentHTML("afterbegin", "0");
     document.querySelector("#totalPrice").insertAdjacentHTML("afterbegin", "0");
-    let h1 = document.querySelector("h1") 
+    let h1 = document.querySelector("h1")
     let newH1 = document.createElement('h1')
-    let divElement =document.getElementById('cartAndFormContainer')
+    let divElement = document.getElementById('cartAndFormContainer')
     newH1.textContent = "Vous n'avez pas encore d'article dans votre panier !"
     divElement.replaceChild(newH1, h1)
   }
@@ -88,14 +89,14 @@ let pElementTotal = document.querySelector('.cart__price p')
 
 function calculateTotalQuantity(item) {
   totalQuantity += parseInt(item.quantity);
-  elementById("totalQuantity").textContent = totalQuantity 
+  elementById("totalQuantity").textContent = totalQuantity
 
 }
 
 function calculateTotalPrice(data, item) {
   // obliger de le faire ici parce que le calcul se fait dans une fonction asynchrone.
   totalPrice += (parseInt(data.price) * parseInt(item.quantity))
-  elementById("totalPrice").textContent= totalPrice
+  elementById("totalPrice").textContent = totalPrice
 
 }
 
@@ -205,12 +206,12 @@ function isFormvalid() {
 //function of email validation 
 const isEmailValide = function (inputEmail) {
   if (regExEmail(inputEmail)) {
-    elementById("emailErrorMsg").textContent= ''
+    elementById("emailErrorMsg").textContent = ''
     let errorElement = document.querySelector('#emailErrorMsg')
     return true
   }
   else {
-    elementById("emailErrorMsg").textContent= 'Merci de saisir un email valide'
+    elementById("emailErrorMsg").textContent = 'Merci de saisir un email valide'
     return false
   }
 };
@@ -240,7 +241,7 @@ const isCityValide = function (inputCity) {
 const isFirstNameValide = function (inputFirstName) {
   if (regExPrenomNomVille(inputFirstName)) {
     elementById("firstNameErrorMsg").textContent = ''
-  
+
     return true
   }
   else {
@@ -255,7 +256,7 @@ const isLastNameValide = function (inputLastName) {
     return true
   }
   else {
-    elementById("lastNameErrorMsg").textContent= 'Merci de saisir un nom valide'
+    elementById("lastNameErrorMsg").textContent = 'Merci de saisir un nom valide'
     return false
   }
 }
@@ -310,5 +311,5 @@ function getFormeValues() {
 }
 // delete the localstorage after validation of the command
 function clearLocalStorage() {
-    localStorage.clear()
+  localStorage.clear()
 }

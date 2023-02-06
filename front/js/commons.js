@@ -25,7 +25,7 @@ function pElement(product) {
     // p
     const pElement = document.createElement("p");
     pElement.className = "productDescription"
-    pElement.textContent = product.description
+    pElement.tex = product.description
     return pElement;
 
 }
