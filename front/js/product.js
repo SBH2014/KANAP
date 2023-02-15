@@ -6,15 +6,17 @@ let search_params = new URLSearchParams(url.search);
 
 if (search_params.has('id')) {
     var id = search_params.get('id');
+
     fetch("http://localhost:3000/api/products/" + id)
         .then(response => response.json())
         .then((product) => createProductToHtml(product))
 }
 
 // on click, save, add, product selected by ID in local Storage //
-let button = elementById("addToCart")
+let button = document.getElementById("addToCart")
 button.addEventListener("click", () => {
-    var optionsProduct = fillProductsOptions()
+    const optionsProduct = fillProductsOptions()
+
     if (isSelectedQuantityAndColorValid()) {
         addProductToBasket(optionsProduct);
         document.querySelector("#addToCart").style.color = "rgb(0, 200, 0)";
@@ -27,26 +29,35 @@ button.addEventListener("click", () => {
     }
 })
 
+
 // functions ------------------- Start -------------------------//
 function addProductToBasket(optionsProduct) {
     let productsInLocalStorage = getBasketFromLocalStorage()
     if (productsInLocalStorage) {
         const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
-        foundproduct ? foundproduct.quantity += optionsProduct.quantity : productsInLocalStorage.push(optionsProduct)
+        if(foundproduct) {
+            let quantity = parseInt(foundproduct.quantity);
+            quantity += parseInt(optionsProduct.quantity);
+            foundproduct.quantity = quantity
+        } else {
+            productsInLocalStorage.push(optionsProduct)
+        } 
     }
     // if there's not product in local Storage, create an array and push it //
     else {
         productsInLocalStorage = [];
         productsInLocalStorage.push(optionsProduct);
     }
+
     saveUpdatedBasketIntoLocalStorage(productsInLocalStorage)
 }
 function fillProductsOptions() {
     return {
         productId: id,
-        quantity: parseInt(elementById("quantity").value),
-        color: elementById("colors").value
+        quantity: parseInt(document.getElementById("quantity").value),
+        color: document.getElementById("colors").value
     };
+
 }
 
 function isSelectedQuantityAndColorValid() {
@@ -58,20 +69,19 @@ function isSelectedQuantityAndColorValid() {
 function createProductToHtml(product) {
     document.getElementsByClassName("item__img")[0].appendChild(imgElement(product))
     let pElement = document.querySelector('.item__content__titlePrice p')
-    console.log(pElement)
-    let priceSpan = elementById('price')
+    let priceSpan = document.getElementById('price')
     priceSpan.textContent = product.price
 
 
     let htmlTitle = product.name
-    let titleElement = elementById('title')
+    let titleElement = document.getElementById('title')
     titleElement.insertAdjacentHTML("afterbegin", htmlTitle);
 
     let htmlDescription = product.description
-    let descriptionElement = elementById('description')
+    let descriptionElement = document.getElementById('description')
     descriptionElement.insertAdjacentHTML("beforeend", htmlDescription);
-    const selectElement = elementById('colors')
-    for (var color of product.colors) {
+    const selectElement = document.getElementById('colors')
+    for (let color of product.colors) {
         selectElement.appendChild(optionElement(color));
     }
 }
@@ -85,7 +95,7 @@ function optionElement(color) {
     // option
     const optionElement = document.createElement("option");
     optionElement.value = color
-    optionElement.textContent= color
+    optionElement.textContent = color
     return optionElement
 }
 

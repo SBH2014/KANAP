@@ -3,7 +3,7 @@ fetch("http://localhost:3000/api/products")
     .then((response) => response.json())
     //what we have received and which has been processed in json will be called products
     .then((products) => {
-        for (var product of products) {
+        for (let  product of products) {
             let aElement = document.createElement('a')
 
             aElement.innerHTML += displayProduct(product)
@@ -20,7 +20,6 @@ function displayProduct(product) {
       <p class="productDescription">${product.description}</p>
     </article>
   </a>`   
-
 }
 
 
