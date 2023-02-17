@@ -1,12 +1,14 @@
 
 //This const is to find a query string who contain '?'
 //Which is followed by URL parameter In this case the "id" parameter
+//retrieves the URL of the current page
 let url = new URL(window.location.href);
 let search_params = new URLSearchParams(url.search);
 
+// check if the parameter exists in the URL
 if (search_params.has('id')) {
-    var id = search_params.get('id');
-
+      var id = search_params.get('id');
+    // We only retrieve the product we need via the parameter in the request
     fetch("http://localhost:3000/api/products/" + id)
         .then(response => response.json())
         .then((product) => createProductToHtml(product))
@@ -35,13 +37,16 @@ function addProductToBasket(optionsProduct) {
     let productsInLocalStorage = getBasketFromLocalStorage()
     if (productsInLocalStorage) {
         const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
-        if(foundproduct) {
+
+        // If the product exists in the localStorage, we retrieve its content, we modify the quantity, then we send it back to the localStorage with the new product added.
+        if (foundproduct) {
             let quantity = parseInt(foundproduct.quantity);
             quantity += parseInt(optionsProduct.quantity);
             foundproduct.quantity = quantity
-        } else {
+        }
+        else {
             productsInLocalStorage.push(optionsProduct)
-        } 
+        }
     }
     // if there's not product in local Storage, create an array and push it //
     else {

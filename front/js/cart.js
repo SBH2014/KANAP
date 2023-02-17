@@ -10,17 +10,12 @@ const fetchProductData = (item) => {
     .then((data) => {
       let htmlArticle = makeNewArticle(item, data)
       cart__items.insertAdjacentHTML('beforeend', htmlArticle);
-
-      console.log("{item.productId")
-
       document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"] .deleteItem`).addEventListener('click', event => {
         document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"]`).remove();
         removeProductFromBasket(item);
         updatCart();
         location.reload();
-
       })
-
       document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"] .itemQuantity`).addEventListener('input', event => {
         const value = event.target.value;
         changeQuantityInBasket(item, value);
@@ -30,40 +25,14 @@ const fetchProductData = (item) => {
       updatCart()
 
     })
-
     .catch((e) => console.error(e))
 
 }
-//  remove product from cart page 
-/*
-let deletButton = document.querySelectorAll('.deleteItem');
-deletButton.forEach(item => {
-  item.addEventListener('click', event => {
-    removeProductFromBasket(item);
-  
-  })
- 
-})
-
-// change quantity in cart page
-/*
-document.querySelectorAll('.itemQuantity').forEach(item => {
-item.addEventListener('input', event => {
-const value = event.target.value;
-changeQuantityInBasket(item,value)
-console.log("hello")
-updatCart()
-})
-
-})
-*/
 
 function updatCart() {
   calculateTotalPrice()
   calculateTotalQuantity()
-
 }
-
 // display product in cart page 
 // Function define the conditions for displaying the products in the basket
 function displayProducts() {
@@ -82,12 +51,9 @@ function displayProducts() {
     divElement.replaceChild(newH1, h1)
   }
 }
-
 //
 displayProducts();
 
-// attention innerHtml -----------------------------§§§§§§§...../// 
-// faire la meme chose ans le script 
 // create html elements in the DOM 
 function makeNewArticle(item, product) {
   return `<article class="cart__item" data-id="${item.productId}" data-color="${item.color}">
@@ -121,8 +87,8 @@ function calculateTotalQuantity() {
   document.getElementById("totalQuantity").textContent = totalQuantity
 }
 
+
 function calculateTotalPrice() {
-  // obliger de le faire ici parce que le calcul se fait dans une fonction asynchrone.
   let totalPrice = 0;
   products.forEach(function (product) {
     fetch("http://localhost:3000/api/products/" + product.productId)
@@ -136,8 +102,6 @@ function calculateTotalPrice() {
 
 }
 
-
-// function to delet products from basket 
 function removeProductFromBasket(item) {
   const newCart = products.filter(itemInLS => itemInLS.productId !== item.productId || itemInLS.color !== item.color);
   saveUpdatedBasketIntoLocalStorage(newCart);
@@ -149,19 +113,8 @@ function changeQuantityInBasket(item, value) {
   }
   saveUpdatedBasketIntoLocalStorage(products);
 }
-//listen to the change in quantity
-
-function getDataColorOfArticle(item) {
-  return item.closest('article').getAttribute("data-color");
-}
-
-function getDataIdOfArticle(item) {
-  return item.closest('article').getAttribute("data-id");
-}
 
 // --------------------------------- end display products in cart page--------------------------------------------//
-
-
 
 //--------------------------------Validation of the Form----------------------------------------//
 
@@ -321,4 +274,5 @@ function getFormeValues() {
     email: document.querySelector("#email").value,
   };
 }
+
 
