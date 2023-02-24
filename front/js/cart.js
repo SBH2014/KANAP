@@ -3,8 +3,12 @@
 //get products from localstorage 
 let products = getBasketFromLocalStorage()
 let cart__items = document.getElementById("cart__items")
+displayProducts();
+
+//functions -----------------------------------------------start----------------------------------------------------------//
+
 //  call of the api product resource
-const fetchProductData = (item) => {
+function fetchProductData(item) {
   fetch("http://localhost:3000/api/products/" + item.productId)
     .then((response) => response.json())
     .then((data) => {
@@ -14,7 +18,7 @@ const fetchProductData = (item) => {
         document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"]`).remove();
         removeProductFromBasket(item);
         updatCart();
-        location.reload();
+
       })
       document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"] .itemQuantity`).addEventListener('input', event => {
         const value = event.target.value;
@@ -52,7 +56,6 @@ function displayProducts() {
   }
 }
 //
-displayProducts();
 
 // create html elements in the DOM 
 function makeNewArticle(item, product) {
@@ -81,7 +84,9 @@ function makeNewArticle(item, product) {
 
 function calculateTotalQuantity() {
   let totalQuantity = 0;
-  products.forEach(function (product) {
+  const basket = getBasketFromLocalStorage()
+
+  basket.forEach(function (product) {
     totalQuantity += parseInt(product.quantity)
   })
   document.getElementById("totalQuantity").textContent = totalQuantity
@@ -90,7 +95,11 @@ function calculateTotalQuantity() {
 
 function calculateTotalPrice() {
   let totalPrice = 0;
-  products.forEach(function (product) {
+  const basket = getBasketFromLocalStorage()
+  if (!basket.length) {
+    document.getElementById("totalPrice").textContent = totalPrice
+  }
+  basket.forEach(function (product) {
     fetch("http://localhost:3000/api/products/" + product.productId)
       .then((response) => response.json())
       .then((data) => {
@@ -103,22 +112,26 @@ function calculateTotalPrice() {
 }
 
 function removeProductFromBasket(item) {
-  const newCart = products.filter(itemInLS => itemInLS.productId !== item.productId || itemInLS.color !== item.color);
+  const basket = getBasketFromLocalStorage()
+  const newCart = basket.filter(itemInLS => itemInLS.productId !== item.productId || itemInLS.color !== item.color);
   saveUpdatedBasketIntoLocalStorage(newCart);
 }
 function changeQuantityInBasket(item, value) {
-  const findProduct = products.find(product => item.productId === product.productId && item.color === product.color);
+  const basket = getBasketFromLocalStorage()
+  const findProduct = basket.find(product => item.productId === product.productId && item.color === product.color);
   if (findProduct) {
     findProduct.quantity = value > 100 ? 100 : value < 1 ? 1 : value;
+
   }
-  saveUpdatedBasketIntoLocalStorage(products);
+  saveUpdatedBasketIntoLocalStorage(basket);
 }
 
+// functions -----------------------------------End----------------------------------------------------------------//
 // --------------------------------- end display products in cart page--------------------------------------------//
 
-//--------------------------------Validation of the Form----------------------------------------//
+//-------------------------------------------Validation of the Form----------------------------------------------//
 
-//------------------------------ RegEx Function--------------------------------//
+//------------------------------ --------------RegEx Function---------------------------------------------------//
 // regEx of the email
 let regExEmail = (value) => {
   return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value))
@@ -155,6 +168,26 @@ buttonOrder.addEventListener("click", function (e) {
 // delete the localstorage after validation of the command
 function clearLocalStorage() {
   localStorage.clear()
+}
+//function on posting validation to server
+
+function sendProductIdAndContact() {
+  let formValues = getFormeValues()
+  // put the values ​​of the forms and the selected products in an object sent to the servers
+  const productsAndFormtoSend = {
+    products: products.map(aProduct => aProduct.productId),
+    contact: formValues
+  }
+  //send object "productsAndFormtoSend" to the server 
+  const rawResponse = fetch('http://localhost:3000/api/products/order', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(productsAndFormtoSend)
+  }).then((response) => response.json())
+    .then((data) => window.location.replace(`/front/html/confirmation.html?commande=${data.orderId}`))
 }
 //---------------------------------------case-by-case treatment-------------------------------------//
 // get the form 
@@ -241,27 +274,6 @@ const isLastNameValide = function (inputLastName) {
   }
 }
 
-
-//function on posting validation to server
-
-function sendProductIdAndContact() {
-  let formValues = getFormeValues()
-  // put the values ​​of the forms and the selected products in an object sent to the servers
-  const productsAndFormtoSend = {
-    products: products.map(aProduct => aProduct.productId),
-    contact: formValues
-  }
-  //send object "productsAndFormtoSend" to the server 
-  const rawResponse = fetch('http://localhost:3000/api/products/order', {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(productsAndFormtoSend)
-  }).then((response) => response.json())
-    .then((data) => window.location.replace(`/front/html/confirmation.html?commande=${data.orderId}`))
-}
 
 
 //function to get form values

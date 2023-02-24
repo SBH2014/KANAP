@@ -1,13 +1,13 @@
 
-//This const is to find a query string who contain '?'
-//Which is followed by URL parameter In this case the "id" parameter
+
 //retrieves the URL of the current page
 let url = new URL(window.location.href);
+//This const is to find a query string who contain '?' Which is followed by URL parameter In this case the "id" parameter
 let search_params = new URLSearchParams(url.search);
 
 // check if the parameter exists in the URL
 if (search_params.has('id')) {
-      var id = search_params.get('id');
+    var id = search_params.get('id');
     // We only retrieve the product we need via the parameter in the request
     fetch("http://localhost:3000/api/products/" + id)
         .then(response => response.json())
@@ -19,7 +19,7 @@ let button = document.getElementById("addToCart")
 button.addEventListener("click", () => {
     const optionsProduct = fillProductsOptions()
 
-    if (isSelectedQuantityAndColorValid()) {
+    if (isSelectedQuantityAndColorValid(optionsProduct)) {
         addProductToBasket(optionsProduct);
         document.querySelector("#addToCart").style.color = "rgb(0, 200, 0)";
         document.querySelector("#addToCart").textContent = "Produit ajouté !";
@@ -65,38 +65,30 @@ function fillProductsOptions() {
 
 }
 
-function isSelectedQuantityAndColorValid() {
-    let optionsProduct = fillProductsOptions()
+function isSelectedQuantityAndColorValid(optionsProduct) {
     return optionsProduct.quantity && optionsProduct.quantity >= 1 && optionsProduct.quantity <= 100 && optionsProduct.color
-
 }
 
 function createProductToHtml(product) {
-    document.getElementsByClassName("item__img")[0].appendChild(imgElement(product))
-    let pElement = document.querySelector('.item__content__titlePrice p')
+    document.querySelector(".item__img").appendChild(createImgElement(product))
     let priceSpan = document.getElementById('price')
     priceSpan.textContent = product.price
-
-
-    let htmlTitle = product.name
     let titleElement = document.getElementById('title')
-    titleElement.insertAdjacentHTML("afterbegin", htmlTitle);
-
-    let htmlDescription = product.description
+    titleElement.textContent = product.name
     let descriptionElement = document.getElementById('description')
-    descriptionElement.insertAdjacentHTML("beforeend", htmlDescription);
+    descriptionElement.textContent = product.description
     const selectElement = document.getElementById('colors')
     for (let color of product.colors) {
-        selectElement.appendChild(optionElement(color));
+        selectElement.appendChild(createOptionElement(color));
     }
 }
-function imgElement(product) {
+function createImgElement(product) {
     const imgElement = document.createElement("img");
     imgElement.src = product.imageUrl
     imgElement.alt = product.altTxt
     return imgElement
 }
-function optionElement(color) {
+function createOptionElement(color) {
     // option
     const optionElement = document.createElement("option");
     optionElement.value = color
