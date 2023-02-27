@@ -17,28 +17,32 @@ function fetchProductData(item) {
       document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"] .deleteItem`).addEventListener('click', event => {
         document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"]`).remove();
         removeProductFromBasket(item);
-        updatCart();
+        updateCart();
 
       })
       document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"] .itemQuantity`).addEventListener('input', event => {
         const value = event.target.value;
         changeQuantityInBasket(item, value);
-        updatCart();
+        updateCart();
 
       })
-      updatCart()
+      updateCart()
 
     })
     .catch((e) => console.error(e))
 
 }
-
-function updatCart() {
+/**
+ * function to update total price and total quantity 
+ */
+function updateCart() {
   calculateTotalPrice()
   calculateTotalQuantity()
 }
-// display product in cart page 
-// Function define the conditions for displaying the products in the basket
+
+/**
+ * Function define the conditions for displaying the products in the basket
+ */
 function displayProducts() {
   if (products && products.length != 0) {
     for (let item of products) {
@@ -55,13 +59,17 @@ function displayProducts() {
     divElement.replaceChild(newH1, h1)
   }
 }
-//
 
-// create html elements in the DOM 
+/**
+ * function to create article elements in the DOM 
+ * @param {object { productId : string , color : string , quantity : number }} item 
+ * @param {object} product 
+ * @returns {article}
+ */
 function makeNewArticle(item, product) {
   return `<article class="cart__item" data-id="${item.productId}" data-color="${item.color}">
   <div class="cart__item__img">
-    <img src="${product.imageUrl}" alt="Photographie d'un canapé">
+    <img src="${product.imageUrl}" alt="${product.altTxt}">
   </div>
   <div class="cart__item__content">
     <div class="cart__item__content__description">
@@ -82,17 +90,22 @@ function makeNewArticle(item, product) {
 </article>`
 }
 
+/**
+ * function to calculate total quantity 
+ */
+
 function calculateTotalQuantity() {
   let totalQuantity = 0;
   const basket = getBasketFromLocalStorage()
-
   basket.forEach(function (product) {
     totalQuantity += parseInt(product.quantity)
   })
   document.getElementById("totalQuantity").textContent = totalQuantity
 }
 
-
+/**
+ * function to calculate total price and total quantity
+ */
 function calculateTotalPrice() {
   let totalPrice = 0;
   const basket = getBasketFromLocalStorage()
@@ -110,12 +123,22 @@ function calculateTotalPrice() {
   })
 
 }
+/**
+ * function to dynamically remove an item from the cart
+ * @param {object} item 
+ */
 
 function removeProductFromBasket(item) {
   const basket = getBasketFromLocalStorage()
   const newCart = basket.filter(itemInLS => itemInLS.productId !== item.productId || itemInLS.color !== item.color);
+
   saveUpdatedBasketIntoLocalStorage(newCart);
 }
+/**
+ * function to modify the quantities of the basket
+ * @param {object { productId : string , color : string , quantity : number }} item 
+ * @param {number} value 
+ */
 function changeQuantityInBasket(item, value) {
   const basket = getBasketFromLocalStorage()
   const findProduct = basket.find(product => item.productId === product.productId && item.color === product.color);
@@ -123,6 +146,7 @@ function changeQuantityInBasket(item, value) {
     findProduct.quantity = value > 100 ? 100 : value < 1 ? 1 : value;
 
   }
+
   saveUpdatedBasketIntoLocalStorage(basket);
 }
 
@@ -137,18 +161,23 @@ let regExEmail = (value) => {
   return (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(value))
 }
 // regEx of the Firstname lastname and city
-let regExPrenomNomVille = (value) => {
+let regExAlphaNum = (value) => {
   return /^[A-Za-z]{3,20}$/.test(value)
 }
 // regEx of the address 
-let regExaddress = (value) => {
+let regExAddress = (value) => {
   return /^[a-zA-Z0-9À-ÿ\s,.'-]{3,}$/.test(value)
 }
 //------------------------------------End RegEx function---------------------------------------------//
 
 //-------------------------------------- Global Validation Form-------------------------------------//
-function isFormvalid() {
-  return isFirstNameValide(firstName.value) && isLastNameValide(lastName.value) && isCityValide(city.value) && isAddressValide(address.value) && isEmailValide(email.value)
+
+/**
+ * function to validate form fields
+ * @returns {boolean}
+ */
+function handleFormSubmit() {
+  return handleFirstName(firstName.value) && handleLastName(lastName.value) && handleCity(city.value) && handleAddress(address.value) && handleEmail(email.value)
 }
 
 //------------------------------------ validation of the basket page and get confirmation page ----------------------------------------------------//
@@ -156,7 +185,7 @@ let buttonOrder = document.getElementById("order")
 buttonOrder.addEventListener("click", function (e) {
   // prevent the page from reloading
   e.preventDefault();
-  if (isFormvalid()) {
+  if (handleFormSubmit()) {
     sendProductIdAndContact();
     clearLocalStorage();
   }
@@ -165,59 +194,62 @@ buttonOrder.addEventListener("click", function (e) {
   }
 
 })
-// delete the localstorage after validation of the command
+
+/**
+ * function to delete the localstorage after validation of the command
+ */
 function clearLocalStorage() {
   localStorage.clear()
 }
-//function on posting validation to server
 
+/**
+ * function to send the validation to the server
+ */
 function sendProductIdAndContact() {
   let formValues = getFormeValues()
   // put the values ​​of the forms and the selected products in an object sent to the servers
-  const productsAndFormtoSend = {
-    products: products.map(aProduct => aProduct.productId),
+  const basket = getBasketFromLocalStorage()
+  const data = {
+    products: basket.map(product => product.productId),
     contact: formValues
   }
-  //send object "productsAndFormtoSend" to the server 
-  const rawResponse = fetch('http://localhost:3000/api/products/order', {
+  //send object "data" to the server 
+   fetch('http://localhost:3000/api/products/order', {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(productsAndFormtoSend)
+    body: JSON.stringify(data)
   }).then((response) => response.json())
     .then((data) => window.location.replace(`/front/html/confirmation.html?commande=${data.orderId}`))
 }
 //---------------------------------------case-by-case treatment-------------------------------------//
 // get the form 
 let formElement = document.querySelector('form');
-// listen to firstname change 
 formElement.firstName.addEventListener("input", function () {
-  isFirstNameValide(this.value)
+  handleFirstName(this.value)
 });
-// listen to lastname change
 formElement.lastName.addEventListener("input", function () {
-  isLastNameValide(this.value)
+  handleLastName(this.value)
 });
-//listen to the modification of the city
 formElement.city.addEventListener("input", function () {
-
-  isCityValide(this.value)
-
+  handleCity(this.value)
 });
-// listen to the modification of the address 
 formElement.address.addEventListener("input", function () {
-  isAddressValide(this.value)
+  handleAddress(this.value)
 });
 // listen to the modification of the email
 formElement.email.addEventListener("input", function () {
-  isEmailValide(this.value)
+  handleEmail(this.value)
 })
 //-----------------case-by-case validation functions --------------------------//
-
-//function of email validation 
-const isEmailValide = function (inputEmail) {
+/**
+ * function of email validation 
+ * @param {string } inputEmail ???????????????????????????????????????????????????????????????
+ * @returns {boolean}
+ */
+const handleEmail = function (inputEmail) {
   if (regExEmail(inputEmail)) {
     document.getElementById("emailErrorMsg").textContent = ''
     let errorElement = document.querySelector('#emailErrorMsg')
@@ -228,9 +260,14 @@ const isEmailValide = function (inputEmail) {
     return false
   }
 };
-//function of address validation 
-const isAddressValide = function (inputAddress) {
-  if (regExaddress(inputAddress)) {
+
+/**
+ * function of address validation 
+ * @param {string} inputAddress 
+ * @returns {boolean}
+ */
+const handleAddress = function (inputAddress) {
+  if (regExAddress(inputAddress)) {
     document.getElementById("addressErrorMsg").textContent = ''
     return true
   }
@@ -239,9 +276,14 @@ const isAddressValide = function (inputAddress) {
     return false
   }
 };
-//function of city validation 
-const isCityValide = function (inputCity) {
-  if (regExPrenomNomVille(inputCity)) {
+
+/**
+ * function of city validation 
+ * @param {string} inputCity 
+ * @returns {boolean}
+ */
+const handleCity = function (inputCity) {
+  if (regExAlphaNum(inputCity)) {
     document.getElementById("cityErrorMsg").textContent = ''
     return true
   }
@@ -250,11 +292,15 @@ const isCityValide = function (inputCity) {
     return false
   }
 };
-//function of firstName validation 
-const isFirstNameValide = function (inputFirstName) {
-  if (regExPrenomNomVille(inputFirstName)) {
-    document.getElementById("firstNameErrorMsg").textContent = ''
 
+/**
+ * function of firstName validation 
+ * @param {string} inputFirstName 
+ * @returns  {boolean}
+ */
+const handleFirstName = function (inputFirstName) {
+  if (regExAlphaNum(inputFirstName)) {
+    document.getElementById("firstNameErrorMsg").textContent = ''
     return true
   }
   else {
@@ -262,9 +308,14 @@ const isFirstNameValide = function (inputFirstName) {
     return false
   }
 };
-//function of lastName validation 
-const isLastNameValide = function (inputLastName) {
-  if (regExPrenomNomVille(inputLastName)) {
+/**
+ * function of lastName validation 
+ * @param {string} inputLastName 
+ * @returns {boolean}
+ */
+
+const handleLastName = function (inputLastName) {
+  if (regExAlphaNum(inputLastName)) {
     document.getElementById("lastNameErrorMsg").textContent = ''
     return true
   }
@@ -273,10 +324,11 @@ const isLastNameValide = function (inputLastName) {
     return false
   }
 }
+/**
+ * function to get form values firstName , lastName, address, city, email
+ * @returns {object}
+ */
 
-
-
-//function to get form values
 function getFormeValues() {
   return {
     firstName: document.querySelector("#firstName").value,

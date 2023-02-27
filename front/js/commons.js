@@ -1,21 +1,24 @@
 
 
-
+/** 
+ * save product in localStorage
+ * @param {object} product 
+ */
 function saveUpdatedBasketIntoLocalStorage(product) {
     localStorage.setItem("product", JSON.stringify(product))
 }
 
-/**
- * 
- * @returns {{productId : number , color : string , quantity : number}}
+/** 
+ * get basket from localStorage 
+ * @returns {{productId : string , color : string , quantity : number}}
  */
 function getBasketFromLocalStorage() {
     return JSON.parse(localStorage.getItem("product"))
 }
-/**
+/** get product from localStorage by Id 
  * 
- * @param {productId : number , color : string , quantity : number} productsInLocalStorage 
- * @param {productId : number , color : string , quantity : number} optionsProduct 
+ * @param {productId : string , color : string , quantity : number} productsInLocalStorage 
+ * @param {productId : string , color : string , quantity : number} optionsProduct 
  * @returns  {boolean}
  */
 function getProductFromLocalStorageById(productsInLocalStorage, optionsProduct) {
@@ -23,16 +26,6 @@ function getProductFromLocalStorageById(productsInLocalStorage, optionsProduct) 
         return product.productId === optionsProduct.productId && product.color === optionsProduct.color;
     });
 
-}
-
-function deleteProductFromLocalStorageById(productsInLocalStorage, optionsProduct) {
-    return productsInLocalStorage.find((product) => {
-        return product.productId === optionsProduct.productId && product.color === optionsProduct.color;
-    });
-}
-
-function elementById(id) {
-    return document.getElementById(id);
 }
 
 

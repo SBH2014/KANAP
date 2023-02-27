@@ -12,6 +12,8 @@ if (search_params.has('id')) {
     fetch("http://localhost:3000/api/products/" + id)
         .then(response => response.json())
         .then((product) => createProductToHtml(product))
+
+
 }
 
 // on click, save, add, product selected by ID in local Storage //
@@ -33,11 +35,14 @@ button.addEventListener("click", () => {
 
 
 // functions ------------------- Start -------------------------//
+/**
+ * function to add product in localStorage 
+ * @param {{productId : number , color : string , quantity : number}} optionsProduct 
+ */
 function addProductToBasket(optionsProduct) {
     let productsInLocalStorage = getBasketFromLocalStorage()
     if (productsInLocalStorage) {
         const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
-
         // If the product exists in the localStorage, we retrieve its content, we modify the quantity, then we send it back to the localStorage with the new product added.
         if (foundproduct) {
             let quantity = parseInt(foundproduct.quantity);
@@ -56,6 +61,11 @@ function addProductToBasket(optionsProduct) {
 
     saveUpdatedBasketIntoLocalStorage(productsInLocalStorage)
 }
+/**
+ * function to fill product options 
+ * @returns {{productId : string , quantity : number, color : string }}
+ */
+
 function fillProductsOptions() {
     return {
         productId: id,
@@ -64,10 +74,20 @@ function fillProductsOptions() {
     };
 
 }
+/**
+ * color and quantity validation conditions
+ * @param {{productId : string , quantity : number, color : string}} optionsProduct 
+ * @returns  {boolean}
+ */
 
 function isSelectedQuantityAndColorValid(optionsProduct) {
     return optionsProduct.quantity && optionsProduct.quantity >= 1 && optionsProduct.quantity <= 100 && optionsProduct.color
 }
+/**
+ * 
+ * @param {object} product 
+ * @returns {article} html element to create  product 
+ */
 
 function createProductToHtml(product) {
     document.querySelector(".item__img").appendChild(createImgElement(product))
@@ -82,12 +102,22 @@ function createProductToHtml(product) {
         selectElement.appendChild(createOptionElement(color));
     }
 }
+/**
+ * function to create img element 
+ * @param {object} product 
+ * @returns {img} img elemnt 
+ */
 function createImgElement(product) {
     const imgElement = document.createElement("img");
     imgElement.src = product.imageUrl
     imgElement.alt = product.altTxt
     return imgElement
 }
+/**
+ * function to create  option element 
+ * @param {string} color 
+ * @returns {option} 
+ */
 function createOptionElement(color) {
     // option
     const optionElement = document.createElement("option");

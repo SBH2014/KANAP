@@ -6,11 +6,16 @@ fetch("http://localhost:3000/api/products")
   .then((products) => {
     const sectionElement = document.getElementById('items')
     for (let product of products) {
-      // create the data for each product ( name,desciptionprice,) in the DOM
+      // create the data for each product ( name, desciption, price,) in the DOM
       sectionElement.insertAdjacentHTML( "beforeend", createHtmlFromProduct(product))
     }
   }
   );
+  /**
+   * 
+   * @param {object} product 
+   * @returns {a} html element to create  product cards 
+   */
 function createHtmlFromProduct(product) {
   return `<a href="./product.html?id=${product._id}">
     <article>
