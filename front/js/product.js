@@ -1,4 +1,3 @@
-
 //retrieves the URL of the current page
 let url = new URL(window.location.href);
 //This const is to find a query string who contain '?' Which is followed by URL parameter In this case the "id" parameter
@@ -22,20 +21,18 @@ button.addEventListener("click", () => {
 
     if (isSelectedQuantityAndColorValid(optionsProduct)) {
         addProductToBasket(optionsProduct);
-    
-    }
-    else {
+
+    } else {
         alert("Pour valider votre choix veuillez renseigner une couleur, et une quantité valide entre 1 et 100")
     }
 
-   
+
 })
 
 
 // functions ------------------- Start -------------------------//
 /**
- * function to fill product options 
- * @returns {{productId : string , quantity : number, color : string }}
+ * function to fill product options
  */
 
 function fillProductsOptions() {
@@ -46,21 +43,19 @@ function fillProductsOptions() {
     };
 
 }
+
 /**
  * color and quantity validation conditions
- * @param {{productId : string , quantity : number, color : string}} optionsProduct 
- * @returns  {boolean}
  */
 
 function isSelectedQuantityAndColorValid(optionsProduct) {
     return optionsProduct.quantity && optionsProduct.quantity >= 1 && optionsProduct.quantity <= 100 && optionsProduct.color
 }
-/**
- * 
- * @param {object} product 
- * @returns {article} html element to create  product 
- */
 
+/**
+ *
+ * html element to create  product
+ */
 function createProductToHtml(product) {
     document.querySelector(".item__img").appendChild(createImgElement(product))
     let priceSpan = document.getElementById('price')
@@ -74,10 +69,9 @@ function createProductToHtml(product) {
         selectElement.appendChild(createOptionElement(color));
     }
 }
+
 /**
- * function to create img element 
- * @param {object} product 
- * @returns {img} img elemnt 
+ * function to create img element
  */
 function createImgElement(product) {
     const imgElement = document.createElement("img");
@@ -85,10 +79,9 @@ function createImgElement(product) {
     imgElement.alt = product.altTxt
     return imgElement
 }
+
 /**
- * function to create  option element 
- * @param {string} color 
- * @returns {option} 
+ * function to create  option element
  */
 function createOptionElement(color) {
     // option
