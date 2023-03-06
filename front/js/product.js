@@ -1,5 +1,4 @@
 
-
 //retrieves the URL of the current page
 let url = new URL(window.location.href);
 //This const is to find a query string who contain '?' Which is followed by URL parameter In this case the "id" parameter
@@ -23,44 +22,17 @@ button.addEventListener("click", () => {
 
     if (isSelectedQuantityAndColorValid(optionsProduct)) {
         addProductToBasket(optionsProduct);
-        document.querySelector("#addToCart").style.color = "rgb(0, 200, 0)";
-        document.querySelector("#addToCart").textContent = "Produit ajouté !";
+    
     }
     else {
-
-        document.querySelector("#addToCart").style.color = "rgb(255, 0, 0)";
         alert("Pour valider votre choix veuillez renseigner une couleur, et une quantité valide entre 1 et 100")
     }
+
+   
 })
 
 
 // functions ------------------- Start -------------------------//
-/**
- * function to add product in localStorage 
- * @param {{productId : number , color : string , quantity : number}} optionsProduct 
- */
-function addProductToBasket(optionsProduct) {
-    let productsInLocalStorage = getBasketFromLocalStorage()
-    if (productsInLocalStorage) {
-        const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
-        // If the product exists in the localStorage, we retrieve its content, we modify the quantity, then we send it back to the localStorage with the new product added.
-        if (foundproduct) {
-            let quantity = parseInt(foundproduct.quantity);
-            quantity += parseInt(optionsProduct.quantity);
-            foundproduct.quantity = quantity
-        }
-        else {
-            productsInLocalStorage.push(optionsProduct)
-        }
-    }
-    // if there's not product in local Storage, create an array and push it //
-    else {
-        productsInLocalStorage = [];
-        productsInLocalStorage.push(optionsProduct);
-    }
-
-    saveUpdatedBasketIntoLocalStorage(productsInLocalStorage)
-}
 /**
  * function to fill product options 
  * @returns {{productId : string , quantity : number, color : string }}
