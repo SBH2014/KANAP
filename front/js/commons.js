@@ -1,57 +1,41 @@
-
-
-/** 
- * save product in localStorage
- * @param {object} product 
+/**
+ * Save product in localStorage
  */
-function saveUpdatedBasketIntoLocalStorage(product) {
-    localStorage.setItem("product", JSON.stringify(product))
+function saveBasket(basket) {
+    localStorage.setItem("product", JSON.stringify(basket))
 }
 
-/** 
- * get basket from localStorage 
- * @returns {{productId : string , color : string , quantity : number}}
+/**
+ * Get basket from localStorage
  */
-function getBasketFromLocalStorage() {
+function getBasket() {
     return JSON.parse(localStorage.getItem("product"))
 }
-/** get product from localStorage by Id 
- * 
- * @param {productId : string , color : string , quantity : number} productsInLocalStorage 
- * @param {productId : string , color : string , quantity : number} optionsProduct 
- * @returns  {boolean}
- */
-function getProductFromLocalStorageById(productsInLocalStorage, optionsProduct) {
-    return productsInLocalStorage.find((product) => {
-        return product.productId === optionsProduct.productId && product.color === optionsProduct.color;
-    });
 
-}
 /**
- * function to modify the quantities of the basket
- * @param {object { productId : string , color : string , quantity : number }} item 
- * @param {number} value 
+ * Update quantity
  */
-function changeQuantityInBasket(item, value) {
-    const basket = getBasketFromLocalStorage()
+function updateBasketQuantity(item, value) {
+    const basket = getBasket()
     const findProduct = basket.find(product => item.productId === product.productId && item.color === product.color);
     if (findProduct) {
         findProduct.quantity = value > 100 ? 100 : value < 1 ? 1 : value;
 
     }
 
-    saveUpdatedBasketIntoLocalStorage(basket);
+    saveBasket(basket);
 }
+
 /**
  * function to dynamically remove an item from basket
- * @param {object} item 
+ * @param {object} item
  */
 
-function removeProductFromBasket(item) {
-    const basket = getBasketFromLocalStorage()
+function removeProductToBasket(item) {
+    const basket = getBasket()
     const newCart = basket.filter(itemInLS => itemInLS.productId !== item.productId || itemInLS.color !== item.color);
 
-    saveUpdatedBasketIntoLocalStorage(newCart);
+    saveBasket(newCart);
 }
 
 /**
@@ -63,12 +47,12 @@ function clearLocalStorage() {
 
 
 /**
- * function to calculate total quantity 
+ * function to calculate total quantity
  */
 
-function calculateTotalQuantity() {
+function calculateBasketTotalQuantity() {
     let totalQuantity = 0;
-    const basket = getBasketFromLocalStorage()
+    const basket = getBasket()
     basket.forEach(function (product) {
         totalQuantity += parseInt(product.quantity)
     })
@@ -76,11 +60,11 @@ function calculateTotalQuantity() {
 }
 
 /**
-* function to calculate total price and total quantity
-*/
-function calculateTotalPrice() {
+ * function to calculate total price and total quantity
+ */
+function calculateBasketTotalPrice() {
     let totalPrice = 0;
-    const basket = getBasketFromLocalStorage()
+    const basket = getBasket()
     if (!basket.length) {
         document.getElementById("totalPrice").textContent = totalPrice
     }
@@ -98,30 +82,28 @@ function calculateTotalPrice() {
 
 
 /**
- * function to add product in localStorage 
- * @param {{productId : number , color : string , quantity : number}} optionsProduct 
+ * function to add product in localStorage
  */
-function addProductToBasket(optionsProduct) {
-    let productsInLocalStorage = getBasketFromLocalStorage()
-    if (productsInLocalStorage) {
-        const foundproduct = getProductFromLocalStorageById(productsInLocalStorage, optionsProduct);
+function addProductToBasket(product) {
+    const basket = getBasket() || [];
+    if (basket.length) {
+        const foundProduct = basket.find((p) => {
+            return p.productId === product.productId && p.color === product.color;
+        });
         // If the product exists in the localStorage, we retrieve its content, we modify the quantity, then we send it back to the localStorage with the new product added.
-        if (foundproduct) {
-            let quantity = parseInt(foundproduct.quantity);
-            quantity += parseInt(optionsProduct.quantity);
-            foundproduct.quantity = quantity
-        }
-        else {
-            productsInLocalStorage.push(optionsProduct)
+        if (foundProduct) {
+            let quantity = parseInt(foundProduct.quantity);
+            quantity += parseInt(product.quantity);
+            foundProduct.quantity = quantity
+        } else {
+            basket.push(product)
         }
     }
     // if there's not product in local Storage, create an array and push it //
     else {
-        productsInLocalStorage = [];
-        productsInLocalStorage.push(optionsProduct);
+        basket.push(product);
     }
-
-    saveUpdatedBasketIntoLocalStorage(productsInLocalStorage)
+    saveBasket(basket)
 }
 
 

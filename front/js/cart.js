@@ -1,7 +1,7 @@
 
 // ---------------------------------display products in cart page--------------------------------------------//
-//get products from localstorage 
-let products = getBasketFromLocalStorage()
+//get products from localstorage
+let products = getBasket()
 let cart__items = document.getElementById("cart__items")
 displayProducts();
 
@@ -16,13 +16,13 @@ function fetchProductData(item) {
       cart__items.insertAdjacentHTML('beforeend', htmlArticle);
       document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"] .deleteItem`).addEventListener('click', event => {
         document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"]`).remove();
-        removeProductFromBasket(item);
+        removeProductToBasket(item);
         updateCart();
 
       })
       document.querySelector(`[data-id="${item.productId}"][data-color="${item.color}"] .itemQuantity`).addEventListener('input', event => {
         const value = event.target.value;
-        changeQuantityInBasket(item, value);
+        updateBasketQuantity(item, value);
         updateCart();
 
       })
@@ -33,18 +33,18 @@ function fetchProductData(item) {
 
 }
 /**
- * function to update total price and total quantity 
+ * function to update total price and total quantity
  */
 function updateCart() {
-  calculateTotalPrice()
-  calculateTotalQuantity()
+  calculateBasketTotalPrice()
+  calculateBasketTotalQuantity()
 }
 
 /**
  * Function define the conditions for displaying the products in the basket
  */
 function displayProducts() {
-  if (products && products.length != 0) {
+  if (products && products.length !== 0) {
     for (let item of products) {
       fetchProductData(item);
     }
@@ -61,10 +61,7 @@ function displayProducts() {
 }
 
 /**
- * function to create article elements in the DOM 
- * @param {object { productId : string , color : string , quantity : number }} item 
- * @param {object} product 
- * @returns {article}
+ * Create article HTML
  */
 function makeNewArticle(item, product) {
   return `<article class="cart__item" data-id="${item.productId}" data-color="${item.color}">
@@ -107,7 +104,7 @@ let regExEmail = (value) => {
 let regExAlphaNum = (value) => {
   return /^[A-Za-z]{3,20}$/.test(value)
 }
-// regEx of the address 
+// regEx of the address
 let regExAddress = (value) => {
   return /^[a-zA-Z0-9À-ÿ\s,.'-]{3,}$/.test(value)
 }
@@ -117,7 +114,6 @@ let regExAddress = (value) => {
 
 /**
  * function to validate form fields
- * @returns {boolean}
  */
 function handleFormSubmit() {
   const{firstName, lastName, city, address, email } = getFormeValues()
@@ -145,13 +141,14 @@ buttonOrder.addEventListener("click", function (e) {
  */
 function sendProductIdAndContact() {
   let formValues = getFormeValues()
-  // put the values ​​of the forms and the selected products in an object sent to the servers
-  const basket = getBasketFromLocalStorage()
+  // put the values of the forms and the selected products in an object sent to the servers
+  const basket = getBasket()
+  // todo Attention le panier peut être vide ici
   const data = {
     products: basket.map(product => product.productId),
     contact: formValues
   }
-  //send object "data" to the server 
+  //send object "data" to the server
    fetch('http://localhost:3000/api/products/order', {
     method: 'POST',
     headers: {
@@ -160,10 +157,10 @@ function sendProductIdAndContact() {
     },
     body: JSON.stringify(data)
   }).then((response) => response.json())
-    .then((data) => window.location.replace(`/front/html/confirmation.html?commande=${data.orderId}`))
+    .then((data) =>window.location.href  = `./confirmation.html?commande=${data.orderId}`)
 }
 //---------------------------------------case-by-case treatment-------------------------------------//
-// get the form 
+// get the form
 let formElement = document.querySelector('form');
 formElement.firstName.addEventListener("input", function () {
   handleFirstName(this.value)
@@ -183,14 +180,13 @@ formElement.email.addEventListener("input", function () {
 })
 //-----------------case-by-case validation functions --------------------------//
 /**
- * function of email validation 
+ * function of email validation
  * @param {string } inputEmail
  * @returns {boolean}
  */
 const handleEmail = function (inputEmail) {
   if (regExEmail(inputEmail)) {
     document.getElementById("emailErrorMsg").textContent = ''
-    let errorElement = document.querySelector('#emailErrorMsg')
     return true
   }
   else {
@@ -200,8 +196,8 @@ const handleEmail = function (inputEmail) {
 };
 
 /**
- * function of address validation 
- * @param {string} inputAddress 
+ * function of address validation
+ * @param {string} inputAddress
  * @returns {boolean}
  */
 const handleAddress = function (inputAddress) {
@@ -216,8 +212,8 @@ const handleAddress = function (inputAddress) {
 };
 
 /**
- * function of city validation 
- * @param {string} inputCity 
+ * function of city validation
+ * @param {string} inputCity
  * @returns {boolean}
  */
 const handleCity = function (inputCity) {
@@ -232,8 +228,8 @@ const handleCity = function (inputCity) {
 };
 
 /**
- * function of firstName validation 
- * @param {string} inputFirstName 
+ * function of firstName validation
+ * @param {string} inputFirstName
  * @returns  {boolean}
  */
 const handleFirstName = function (inputFirstName) {
@@ -247,8 +243,8 @@ const handleFirstName = function (inputFirstName) {
   }
 };
 /**
- * function of lastName validation 
- * @param {string} inputLastName 
+ * function of lastName validation
+ * @param {string} inputLastName
  * @returns {boolean}
  */
 
